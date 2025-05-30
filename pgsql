@@ -12,3 +12,12 @@ gerador-kmz/
 │   └── seu-arquivo-de-chave.json
 │
 └── README.md
+
+
+
+apk-gerador-kmz-web/
+├── backend/
+│   ├── main.py
+│   └── gerar_kmz.py  ← Lógica do KMZ (vamos criar)
+├── frontend/
+│   └── index.html
