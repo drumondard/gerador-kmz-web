@@ -1,10 +1,12 @@
 apk-gerador-kmz-web/
 ├── backend/
-│   ├── main.py                ← Código acima
+│   ├── main.py                # FastAPI app + rotas
 │   ├── scripts/
-│   │   ├── kmz_postes.py      ← Script Python para geração dos KMZ de postes
-│   │   └── kmz_cabos.py       ← Script de cabos (já implementado anteriormente)
+│   │   ├── kmz_cabos.py      # Função gerar KMZ para cabos
+│   │   ├── kmz_dutos.py      # Função gerar KMZ para dutos
+│   │   ├── kmz_postes.py     # Função gerar KMZ para postes
+│   │   └── kmz_poligonos.py  # Função gerar KMZ para polígonos
 │   ├── templates/
-│   │   └── index.html         ← Página web estilizada com formulário
+│   │   └── index.html         # Formulário web estilizado
 │   └── static/
-│       └── style.css          ← (opcional, se quiser separar CSS)
+│       └── style.css          # CSS separado opcional
