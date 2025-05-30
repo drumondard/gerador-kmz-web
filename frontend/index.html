@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de KMZ - Interface</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    label, select, input, button { display: block; margin: 15px 0; font-size: 1.1em; }
+    button { padding: 8px 16px; }
+    #resultado { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de KMZ</h1>
+  <label for="ibge">Código IBGE:</label>
+  <input type="text" id="ibge" placeholder="Digite o código IBGE" />
+
+  <label for="tipo">Tipo de dado:</label>
+  <select id="tipo">
+    <option value="cabos">Cabos</option>
+    <option value="dutos">Duto</option>
+    <option value="postes">Poste</option>
+    <option value="poligonos">Polígono</option>
+  </select>
+
+  <button id="gerarBtn">Gerar KMZ</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    document.getElementById('gerarBtn').addEventListener('click', async () => {
+      const ibge = document.getElementById('ibge').value.trim();
+      const tipo = document.getElementById('tipo').value;
+
+      if (!ibge) {
+        alert('Por favor, insira um código IBGE válido.');
+        return;
+      }
+
+      const resultadoDiv = document.getElementById('resultado');
+      resultadoDiv.textContent = 'Gerando KMZ...';
+
+      try {
+        const response = await fetch(`http://10.121.243.101:8000/generate_kmz?ibge=${ibge}&tipo=${tipo}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          resultadoDiv.textContent = 'Erro: ' + (errorData.detail || response.statusText);
+          return;
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        resultadoDiv.innerHTML = `<a href="${url}" download="resultado_${tipo}_${ibge}.kmz">Download do KMZ gerado</a>`;
+      } catch (error) {
+        resultadoDiv.textContent = 'Erro ao gerar KMZ: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
