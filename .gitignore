@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+.env
+*.sqlite3
+*.log
+
+# venv
+venv/
+ENV/
+env/
+.venv/
+
+# VSCode
+.vscode/
+
+# macOS/Linux/Windows
+.DS_Store
+Thumbs.db
+
+# credenciais
+credentials/*.json
