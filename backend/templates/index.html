@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Gerador de Arquivo KMZ</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #000000;
+        color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: url('https://github.com/drumondard/inventario-assets/raw/dd6bd9a2a0d7dc47d055f613d53dfe25c218b3cc/web/Fundo_PBI.JPG') no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    form {
+        background-color: rgba(30, 30, 30, 0.92);
+        padding: 35px 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        position: relative;
+    }
+
+    .project-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #ffffff;
+    }
+
+    .form-title {
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+        font-weight: 600;
+        color: #cccccc;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #cccccc;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    select,
+    input[type="text"] {
+        width: 95%;
+        padding: 14px;
+        margin-bottom: 18px;
+        border-radius: 7px;
+        border: 1px solid #555;
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        font-size: 1rem;
+    }
+
+    input[type="submit"] {
+        background-color: #1976d2;
+        color: white;
+        font-weight: bold;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    input[type="submit"]:hover:not(:disabled) {
+        background-color: #135ba1;
+    }
+
+    input[type="submit"].loading {
+        background-color: #d32f2f; /* vermelho */
+        cursor: wait;
+        color: #fff;
+    }
+
+    input[type="submit"].loading::after {
+        content: "";
+        border: 3px solid #fff;
+        border-top: 3px solid transparent;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        right: 16px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+
+    /* Barra de progresso */
+    #progressBarContainer {
+        width: 100%;
+        height: 12px;
+        background-color: #444;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 15px 0 30px 0;
+        display: none;
+    }
+
+    #progressBar {
+        height: 100%;
+        width: 0%;
+        background-color: #4caf50;
+        transition: width 0.25s ease;
+    }
+
+    /* Modal styles */
+    #kmzModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    #kmzModal .modal-content {
+        background-color: #1e1e1e;
+        margin: 10% auto;
+        padding: 30px;
+        border: 1px solid #444;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+    }
+
+    #kmzModal .close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #ccc;
+    }
+
+    #kmzModal .close-btn:hover {
+        color: #fff;
+    }
+
+    #kmzList {
+        list-style: none;
+        padding: 0;
+        margin: 15px 0 0 0;
+        max-height: 200px;
+        overflow-y: auto;
+        text-align: left;
+    }
+
+    #kmzList li {
+        margin-bottom: 10px;
+    }
+
+    #kmzList li a {
+        color: #4fc3f7;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    #kmzList li a:hover {
+        text-decoration: underline;
+    }
+
+    #kmzModal button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-weight: bold;
+        border: none;
+        background-color: #1976d2;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    #kmzModal button:hover {
+        background-color: #135ba1;
+    }
+</style>
+</head>
+<body>
+
+<form id="kmzForm" method="post">
+    <div class="project-title">Projeto Calisto</div>
+    <div class="form-title">Gerador de Arquivo KMZ</div>
+
+    <label for="tipo">Tipo de Rede:</label>
+    <select name="tipo" id="tipo" required>
+        <option value="">-- Selecione --</option>
+        <option value="cabo">Cabos</option>
+        <option value="duto">Dutos</option>
+        <option value="poste">Postes</option>
+        <option value="poligono">Polígonos</option>
+    </select>
+
+    <label for="codigo_ibge">Código IBGE:</label>
+    <input type="text" id="codigo_ibge" name="codigo_ibge" placeholder="Ex: 3101607, 3140704" required>
+
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+    </div>
+
+    <input type="submit" value="Gerar KMZ" />
+</form>
+
+<!-- Modal -->
+<div id="kmzModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Arquivos KMZ Gerados</h2>
+        <ul id="kmzList"></ul>
+        <button id="closeModalBtn">Fechar</button>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('kmzForm');
+    const submitBtn = form.querySelector('input[type="submit"]');
+    const progressBarContainer = document.getElementById('progressBarContainer');
+    const progressBar = document.getElementById('progressBar');
+    const modal = document.getElementById('kmzModal');
+    const kmzList = document.getElementById('kmzList');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const closeBtn = modal.querySelector('.close-btn');
+
+    // Função para simular barra de progresso
+    function simulateProgress(duration) {
+        return new Promise((resolve) => {
+            let start = null;
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                let elapsed = timestamp - start;
+                let progress = Math.min((elapsed / duration) * 100, 100);
+                progressBar.style.width = progress + '%';
+                if (elapsed < duration) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    resolve();
+                }
+            }
+            window.requestAnimationFrame(step);
+        });
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        // Mostrar a barra de progresso
+        progressBarContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        try {
+            // Simular a barra de progresso durante 3 segundos
+            await simulateProgress(3000);
+
+            // Aqui, sua requisição real:
+            const formData = new FormData(form);
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData
+            });
+
+            kmzList.innerHTML = "";
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.arquivos && data.links) {
+                    for (let i = 0; i < data.arquivos.length; i++) {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = data.links[i];
+                        link.textContent = data.arquivos[i];
+                        link.download = "";
+                        li.appendChild(link);
+                        kmzList.appendChild(li);
+                    }
+                    modal.style.display = "block";
+                } else {
+                    alert("Nenhum arquivo retornado.");
+                }
+            } else {
+                alert("Erro ao gerar KMZ.");
+            }
+        } catch (error) {
+            alert("Erro na requisição: " + error.message);
+        } finally {
+            // Reset
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+            progressBarContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+        }
+    });
+
+    // Fechar modal
+    closeBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    closeModalBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    // Fechar clicando fora do conteúdo
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+</script>
+
+</body>
+</html>
