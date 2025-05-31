@@ -4,5 +4,9 @@ pandas
 geopandas
 google-cloud-bigquery
 google-cloud-storage
+google-auth
 simplekml
 python-dotenv
+python-multipart
+simplekml
+jinja2
